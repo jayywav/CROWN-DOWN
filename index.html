@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crown Down</title>
+<style>
+:root{--bg:#090a0c;--panel:#101216;--line:#303238;--gold:#d7b35d;--muted:#a5a7ac}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#171512 0,#090a0c 34%);color:#f4efe5;font-family:Arial,sans-serif}
+#cd{max-width:1500px;margin:auto;padding:18px}.head{display:flex;align-items:center;justify-content:space-between;gap:15px}.logo{font-family:Georgia,serif;font-size:clamp(27px,4vw,45px);letter-spacing:4px}.logo i{font-style:normal;color:var(--gold)}.tag{font-size:10px;letter-spacing:4px;color:#aaa;margin-top:4px}
+button{font:inherit}.btn{min-height:44px;padding:10px 16px;border:1px solid #3a3c42;border-radius:8px;background:#121419;color:#eee;font-weight:800;cursor:pointer}.btn.gold{background:linear-gradient(#e1c47c,#cda34d);color:#111;border-color:#e4c87f}.btn:disabled{opacity:.3;cursor:not-allowed}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:15px 0}.stat{background:#0e1013;border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center}.stat small{display:block;color:#999;letter-spacing:1.5px}.stat b{font:700 25px Georgia,serif;color:#e4c983}
+.status{border:1px solid #493e27;border-radius:9px;background:#0e0f11;padding:10px 13px;margin-bottom:11px}.status b{color:#e4c983}.status span{display:block;color:#aaa;font-size:13px;margin-top:3px}
+.table{overflow-x:auto;border:1px solid #292b30;border-radius:11px;padding:11px;background:#0b0d10}.board{min-width:990px;display:grid;grid-template-columns:repeat(4,1fr) 160px;gap:12px}.label{text-align:center;color:#d9bd78;font-size:11px;letter-spacing:2px;margin:2px 0 7px}.pile{height:790px;position:relative;border:1px solid #33363b;border-radius:9px;background:#0e1013;overflow:hidden}
+.card{position:absolute;left:50%;transform:translateX(-50%);width:148px;height:205px;border-radius:9px;border:1px solid #d3cec3;background:#f8f5ee;color:#101010;box-shadow:0 3px 8px #0009;padding:0;transition:top .22s ease,transform .15s ease,opacity .18s ease}.card.red{color:#b51f22}.card.top{cursor:pointer}.card.sel{outline:4px solid var(--gold);transform:translateX(-50%) translateY(-3px)}.card.dealing{animation:deal .28s ease-out both}@keyframes deal{from{opacity:0;transform:translate(90px,-80px) rotate(7deg) scale(.85)}to{opacity:1;transform:translateX(-50%) rotate(0) scale(1)}}
+.corner{position:absolute;z-index:3;font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:19px;line-height:.9;width:25px;text-align:center}.tl{left:7px;top:7px}.br{right:7px;bottom:7px;transform:rotate(180deg)}.corner em{display:block;font-family:Georgia,"Times New Roman",serif;font-style:normal;font-size:15px;margin-top:3px}.pips{position:absolute;inset:38px 31px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);align-items:center;justify-items:center;font-family:Georgia,"Times New Roman",serif;font-size:24px;line-height:1;overflow:visible}.pip{display:grid;place-items:center;width:24px;height:24px;line-height:1}.pip.flip{transform:rotate(180deg)}.ace{grid-column:2;grid-row:3;font-size:62px;line-height:1}.face{position:absolute;inset:35px 30px;border:0;display:grid;place-items:center;overflow:visible}
+.face .bigSuit{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:86px;line-height:1;display:block}
+.face .faceRank{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:25px;line-height:1;color:#fff;text-shadow:0 1px 2px #000}
+
+.empty{margin:11px;width:calc(100% - 22px);height:205px;border:2px dashed #373a40;border-radius:9px;background:transparent;color:#6c7077;font-weight:800;cursor:pointer}.empty.target{border-color:#8b753e;color:#c9aa61}.actions{display:grid;grid-template-columns:1fr 1.25fr 1.25fr 1fr;gap:9px;margin-top:11px}
+.notice,.result{display:none;margin-top:10px;padding:13px;border:1px solid #655426;border-radius:9px;background:#17140d}.show{display:block}.score{font:700 48px Georgia,serif;color:var(--gold)}
+.scorePopup{display:none;position:fixed;inset:0;z-index:30;background:#000d;padding:18px;align-items:center;justify-content:center}
+.scorePopup.open{display:flex}.scoreBox{width:min(480px,100%);background:#111318;border:1px solid #7b642d;border-radius:14px;padding:28px;text-align:center;box-shadow:0 18px 60px #000}
+.scoreBox .eyebrow{font-size:11px;letter-spacing:3px;color:#aaa}.scoreBox .bigScore{font:700 82px Georgia,serif;line-height:1;color:var(--gold);margin:10px 0 2px}.scoreBox .scoreType{font:800 18px Georgia,serif;color:#f4efe5}.scoreBox .scoreDetail{color:#aaa;font-size:14px;margin:10px 0 20px;line-height:1.45}.scoreBox .nearMiss{color:#e4c983;font-weight:800;margin-top:7px}
+.overlay{display:none;position:fixed;inset:0;z-index:20;background:#000d;padding:18px;align-items:center;justify-content:center}.overlay.open{display:flex}.rules{width:min(960px,100%);max-height:92vh;overflow:auto;background:#111318;border:1px solid #46484e;border-radius:12px;padding:24px}.rhead{display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid #333;padding-bottom:14px}.rules h2{font:700 30px Georgia,serif;margin:0;color:#ead39a}.rules h3{color:#dfc27b;margin:20px 0 5px}.rules p,.rules li{color:#d0d1d4;line-height:1.55;font-size:15px}.rules ul{padding-left:22px}.ruleGrid{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
+
+.ruleExample{margin:10px 0 16px;padding:12px;border:1px solid #35383e;border-radius:9px;background:#0b0d10}
+.ruleExample small{display:block;color:#aaa;letter-spacing:1.3px;font-weight:800;margin-bottom:9px}
+.miniRow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-height:74px}
+.miniCard{width:48px;height:67px;border-radius:6px;background:#f8f5ee;color:#111;border:1px solid #d4cec3;display:flex;align-items:center;justify-content:center;position:relative;font:800 19px Arial,sans-serif;box-shadow:0 2px 4px #0007}
+.miniCard.red{color:#b51f22}.miniCard.covered{margin-left:-27px;margin-top:19px}.miniCard.goldRing{outline:3px solid #d7b35d}
+.miniCorner{position:absolute;left:5px;top:4px;font-size:12px;line-height:1}.miniSuit{font-size:25px}
+.arrow{color:#d7b35d;font-size:22px;font-weight:900}.xmark{color:#c85b5b;font-size:22px;font-weight:900}
+.miniCol{width:58px;height:76px;border:2px dashed #454950;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#777;font-size:10px;text-align:center}
+.miniTrash{border-color:#6b5630;color:#c7a85f}.miniDeck{width:48px;height:67px;border-radius:6px;border:2px solid #b9974e;background:repeating-linear-gradient(45deg,#17191d,#17191d 4px,#24272c 4px,#24272c 8px)}
+.exampleText{color:#c9cbd0;font-size:13px;line-height:1.35;flex:1;min-width:160px}.exampleText b{color:#ead39a}
+.scoreMini{display:grid;grid-template-columns:auto auto;gap:5px 14px;color:#c9cbd0;font-size:13px}.scoreMini b{color:#ead39a}
+
+@media(prefers-reduced-motion:reduce){.card.dealing{animation:none}.card{transition:none}}
+@media(max-width:700px){#cd{padding:10px}.hud{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr 1fr}.ruleGrid{grid-template-columns:1fr}}
+
+.confirmBar{display:none;margin:10px 0;border:1px solid #8b6a24;background:#111318;border-radius:9px;padding:12px;align-items:center;justify-content:space-between;gap:12px}
+.confirmBar.show{display:flex}.confirmText{color:#ddd;font-size:13px;line-height:1.4}.confirmText b{color:#e7c35d}.confirmBtns{display:flex;gap:8px;flex-shrink:0}
+.card.pending{outline:3px solid #e7c35d;outline-offset:2px}.empty.pending{box-shadow:inset 0 0 0 2px #e7c35d}
+@media(max-width:650px){.confirmBar.show{align-items:stretch;flex-direction:column}.confirmBtns .btn{flex:1}}
+</style>
+</head>
+<body><div id="cd">
+<div class="head"><div><div class="logo"><i>♛</i> CROWN DOWN</div><div class="tag">FOUR COLUMNS. FOUR ACES. LOWEST WINS.</div></div><button class="btn" id="rules" type="button">RULES</button></div>
+<div class="hud"><div class="stat"><small>DECK</small><b id="deckN">52</b></div><div class="stat"><small>TRASH</small><b id="trashN">0</b></div><div class="stat"><small>ROUND</small><b id="roundN">0 / 13</b></div><div class="stat"><small>PAID ACE MOVES</small><b id="paidN">2</b></div></div>
+<div class="status"><b id="st1">READY TO PLAY.</b><span id="st2">Press New Game to shuffle and deal the opening four.</span></div>
+<div class="table"><div class="board" id="board"></div></div>
+<div class="confirmBar" id="confirmBar"><div class="confirmText" id="confirmText"></div><div class="confirmBtns"><button class="btn gold" id="confirmYes" type="button">CONFIRM</button><button class="btn" id="confirmNo" type="button">CANCEL</button></div></div>
+<div class="actions"><button class="btn gold" id="down" disabled type="button">DOWN / DEAL NEXT 4</button><button class="btn" id="finish" disabled type="button">FINISH NORMAL PLAY</button><button class="btn" id="score" disabled type="button">SCORE GAME</button><button class="btn" id="new" type="button">NEW GAME</button></div>
+<div class="notice" id="notice"><b>♛ CROWN DROP</b><div id="noticeText"></div></div><div class="result" id="result"></div>
+</div>
+<div class="scorePopup" id="scorePopup" role="dialog" aria-modal="true" aria-labelledby="scorePopupTitle">
+<div class="scoreBox">
+<div class="eyebrow" id="scorePopupTitle">FINAL SCORE</div>
+<div class="bigScore" id="popupScore">0</div>
+<div class="scoreType" id="popupType">STANDARD</div>
+<div class="scoreDetail" id="popupDetail"></div>
+<button class="btn gold" id="popupNew" type="button" style="width:100%">NEW GAME</button>
+</div></div>
+<div class="overlay" id="modal"><div class="rules"><div class="rhead"><div><h2>Crown Down — Complete Rules</h2><div style="color:#999;margin-top:4px">Four columns. Four Aces. Lowest wins.</div></div><button class="btn" id="close" type="button">CLOSE</button></div>
+<div class="ruleGrid"><div>
+<h3>1. Setup & Goal</h3>
+<p>Use one standard 52-card deck, no Jokers. Play in four face-up columns. Lowest final score wins.</p>
+<div class="ruleExample"><small>VISUAL EXAMPLE</small><div class="miniRow">
+<div class="miniDeck"></div><span class="arrow">→</span>
+<div class="miniCol">COLUMN 1</div><div class="miniCol">COLUMN 2</div><div class="miniCol">COLUMN 3</div><div class="miniCol">COLUMN 4</div>
+<div class="exampleText"><b>1 deck → 4 columns.</b> Your job is to remove as many cards as possible and finish with the lowest score.</div>
+</div></div>
+
+<h3>2. Deal & Rounds</h3>
+<p>Deal one card to each column to start. Each round, deal one new card onto every column. There are 13 rounds, using all 52 cards. Only the top card of each column is active. There is no timer. Make any moves you want, then press <b>Down / Deal Next 4</b>.</p>
+<div class="ruleExample"><small>VISUAL EXAMPLE</small><div class="miniRow">
+<div class="miniCard"><span class="miniCorner">7♣</span><span class="miniSuit">♣</span></div>
+<div class="miniCard red"><span class="miniCorner">3♥</span><span class="miniSuit">♥</span></div>
+<div class="miniCard"><span class="miniCorner">K♠</span><span class="miniSuit">♠</span></div>
+<div class="miniCard red"><span class="miniCorner">9♦</span><span class="miniSuit">♦</span></div>
+<span class="arrow">↓ NEXT 4</span>
+<div class="exampleText">Every press deals <b>one new card to each column</b>. After 13 deals, the deck is empty.</div>
+</div></div>
+
+<h3>3. Eliminating Cards</h3>
+<p>When exposed cards share a suit, a lower card can be removed if a higher card of that same suit is exposed. Ranks go 2 low through Ace high. Removed cards go to Trash. Eliminations are optional. After removing a card, the card underneath becomes active and can be used immediately.</p>
+<div class="ruleExample"><small>VISUAL EXAMPLE</small><div class="miniRow">
+<div class="miniCard red"><span class="miniCorner">4♥</span><span class="miniSuit">♥</span></div>
+<span class="arrow">+</span>
+<div class="miniCard red"><span class="miniCorner">J♥</span><span class="miniSuit">♥</span></div>
+<span class="arrow">→</span>
+<div class="miniCol miniTrash">TRASH<br>4♥</div>
+<div class="exampleText"><b>4♥ is lower than J♥.</b> Because both exposed cards are Hearts, the 4♥ may be removed.</div>
+</div></div>
+
+<h3>4. Moving Cards</h3>
+<ul><li>Any exposed card can move to an <b>empty column for free</b>.</li><li>Non-Aces cannot move onto an occupied column.</li><li>Only an exposed Ace can move onto an occupied column.</li><li>Ace → occupied column costs 1 Paid Ace Move.</li><li>You get 2 Paid Ace Moves for the whole game.</li><li>Moving a card exposes the card underneath it.</li></ul>
+<div class="ruleExample"><small>VISUAL EXAMPLES</small>
+<div class="miniRow"><div class="miniCard"><span class="miniCorner">8♣</span><span class="miniSuit">♣</span></div><span class="arrow">→</span><div class="miniCol">EMPTY</div><div class="exampleText"><b>FREE:</b> 8♣ or any other exposed card can move into an empty column.</div></div>
+<div class="miniRow"><div class="miniCard"><span class="miniCorner">A♠</span><span class="miniSuit">♠</span></div><span class="arrow">→</span><div class="miniCard red"><span class="miniCorner">6♦</span><span class="miniSuit">♦</span></div><div class="exampleText"><b>PAID:</b> A♠ can move onto the occupied 6♦ column. This uses 1 Paid Ace Move.</div></div>
+<div class="miniRow"><div class="miniCard"><span class="miniCorner">8♣</span><span class="miniSuit">♣</span></div><span class="xmark">✕</span><div class="miniCard red"><span class="miniCorner">6♦</span><span class="miniSuit">♦</span></div><div class="exampleText"><b>NOT LEGAL:</b> a non-Ace cannot move onto an occupied column.</div></div>
+</div>
+</div><div>
+
+<h3>5. Ending Normal Play</h3>
+<p>After the 13th deal, make any final legal moves or eliminations. When finished, press <b>Finish Normal Play</b>. No normal moves can be made after that.</p>
+<div class="ruleExample"><small>VISUAL EXAMPLE</small><div class="miniRow">
+<div class="miniDeck"></div><span class="arrow">13th DEAL</span><span class="arrow">→</span>
+<div style="border:1px solid #5c5137;border-radius:6px;padding:10px;color:#ead39a;font-weight:800">FINAL MOVES</div><span class="arrow">→</span>
+<div style="border:1px solid #5c5137;border-radius:6px;padding:10px;color:#ead39a;font-weight:800">FINISH NORMAL PLAY</div>
+<div class="exampleText">The last deal does <b>not</b> instantly end the game. Make your final legal plays first.</div>
+</div></div>
+
+<h3>6. Crown Drop / Ace Cut</h3>
+<p>You earn Crown Drop only if the <b>first four cards dealt are all four Aces</b>. Four Aces appearing together later does not count. After normal play ends, choose one of those original opening Aces. Every card above that Ace in its current column goes to Trash, while the Ace stays. This is the final action before scoring.</p>
+<div class="ruleExample"><small>VISUAL EXAMPLE</small>
+<div class="miniRow">
+<div class="miniCard goldRing"><span class="miniCorner">A♠</span><span class="miniSuit">♠</span></div>
+<div class="miniCard red goldRing"><span class="miniCorner">A♥</span><span class="miniSuit">♥</span></div>
+<div class="miniCard red goldRing"><span class="miniCorner">A♦</span><span class="miniSuit">♦</span></div>
+<div class="miniCard goldRing"><span class="miniCorner">A♣</span><span class="miniSuit">♣</span></div>
+<div class="exampleText"><b>Opening deal = all four Aces → Crown Drop earned.</b></div>
+</div>
+<div class="miniRow">
+<div style="display:flex;align-items:flex-start"><div class="miniCard goldRing"><span class="miniCorner">A♠</span><span class="miniSuit">♠</span></div><div class="miniCard red covered"><span class="miniCorner">5♥</span><span class="miniSuit">♥</span></div><div class="miniCard covered"><span class="miniCorner">K♣</span><span class="miniSuit">♣</span></div></div>
+<span class="arrow">ACE CUT →</span><div class="miniCard goldRing"><span class="miniCorner">A♠</span><span class="miniSuit">♠</span></div><div class="miniCol miniTrash">TRASH<br>5♥ K♣</div>
+<div class="exampleText">Choose the original A♠: <b>everything above it is trashed</b>, but the Ace remains.</div>
+</div></div>
+
+<h3>7. Scoring</h3>
+<ul><li>Each card left on the board = <b>+1</b>.</li><li>There is <b>no extra penalty</b> for a covered Ace.</li><li>If all four Aces remain on the board at the end, you normally earn <b>All 4 Aces exposed → Crown bonus −2</b>.</li><li><b>Near Miss:</b> if exactly 5 cards remain and all four Aces are still on the board, you lose the Crown bonus and score <b>5</b>.</li><li><b>Soft 4 (4S):</b> 6 cards remain with all four Aces, so Ace bonus −2 makes the final score <b>4</b>.</li><li><b>Perfect 4 (4P):</b> exactly four cards remain and all four are Aces. The score is exactly <b>4</b>; do not subtract Crown again.</li><li>If Perfect 4 and Soft 4 tie at 4, <b>Perfect 4 wins</b>.</li><li><b>HAND:</b> the normal result.</li><li><b>No Crown bonus unless all 4 Aces are exposed on top at scoring.</b> Covered/buried Aces do not count. If fewer than 4 Aces are exposed, your score is simply the number of cards left.</li><li>If all 4 Aces are exposed, subtract 2 from the card count, except for Near Miss and Perfect 4.</li></ul>
+<div class="ruleExample"><small>VISUAL EXAMPLES</small>
+<div class="scoreMini">
+<span>6 cards remain</span><b>+6</b>
+<span>7 cards + all 4 Aces</span><b>5 · HAND</b>
+<span>6 cards + all 4 Aces</span><b>4S · Soft 4</b>
+<span>5 cards + all 4 Aces</span><b>5 · Near Miss</b>
+<span>Only A♠ A♥ A♦ A♣ remain</span><b>4P · Perfect 4</b>
+</div>
+</div>
+</div></div></div></div></div></div>
+<script>
+(function(){
+"use strict";
+var ranks=["2","3","4","5","6","7","8","9","10","J","Q","K","A"],suits=[["♠",0],["♥",1],["♦",1],["♣",0]],S,timers=[];
+function E(x){return document.getElementById(x)}function top(i){var c=S.cols[i];return c.length?c[c.length-1]:null}function rv(r){return ranks.indexOf(r)}
+function fresh(){return{deck:[],cols:[[],[],[],[]],trash:[],round:0,paid:2,sel:-1,playing:false,ended:false,crownDrop:false,opening:[],cut:false,dealing:false,newIds:[]}}
+function mkdeck(){var d=[],id=0,s,r,i,j,t;for(s=0;s<4;s++)for(r=0;r<13;r++)d.push({id:++id,r:ranks[r],s:suits[s][0],red:!!suits[s][1]});for(i=51;i>0;i--){j=Math.floor(Math.random()*(i+1));t=d[i];d[i]=d[j];d[j]=t}return d}
+function say(a,b){E("st1").textContent=a;E("st2").textContent=b||""}
+function pos(n){return({2:[[2,1],[2,5]],3:[[2,1],[2,3],[2,5]],4:[[1,1],[3,1],[1,5],[3,5]],5:[[1,1],[3,1],[2,3],[1,5],[3,5]],6:[[1,1],[3,1],[1,3],[3,3],[1,5],[3,5]],7:[[1,1],[3,1],[2,2],[1,3],[3,3],[1,5],[3,5]],8:[[1,1],[3,1],[2,2],[1,3],[3,3],[2,4],[1,5],[3,5]],9:[[1,1],[3,1],[1,2],[3,2],[2,3],[1,4],[3,4],[1,5],[3,5]],10:[[1,1],[3,1],[2,2],[1,2],[3,2],[1,4],[3,4],[2,4],[1,5],[3,5]]})[n]||[]}
+function card(c,i,isTop,sel){var b=document.createElement("button");b.type="button";b.className="card"+(c.red?" red":"")+(isTop?" top":"")+(sel?" sel":"")+(S.newIds.indexOf(c.id)>=0?" dealing":"");var h='<div class="corner tl">'+c.r+'<em>'+c.s+'</em></div><div class="corner br">'+c.r+'<em>'+c.s+'</em></div>';if(c.r==="A")h+='<div class="pips"><span class="ace">'+c.s+'</span></div>';else if("JQK".indexOf(c.r)>=0)h+='<div class="face"><span class="bigSuit">'+c.s+'</span><strong class="faceRank">'+c.r+'</strong></div>';else{var a=pos(+c.r);h+='<div class="pips">';for(var p=0;p<a.length;p++)h+='<span class="pip'+(a[p][1]>=4?" flip":"")+'" style="grid-column:'+a[p][0]+';grid-row:'+a[p][1]+'">'+c.s+'</span>';h+='</div>'}b.innerHTML=h;if(isTop)b.addEventListener("click",function(){choose(i)});else b.disabled=true;return b}
+function render(){E("deckN").textContent=S.deck.length;E("trashN").textContent=S.trash.length;E("roundN").textContent=S.round+" / 13";E("paidN").textContent=S.paid;var B=E("board");B.innerHTML="";for(var i=0;i<4;i++){var z=document.createElement("div"),l=document.createElement("div"),p=document.createElement("div");l.className="label";l.textContent="COLUMN "+(i+1);p.className="pile";z.appendChild(l);z.appendChild(p);if(!S.cols[i].length){var e=document.createElement("button");e.type="button";e.className="empty"+(S.sel>=0?" target":"");e.textContent="OPEN SPACE";(function(x){e.addEventListener("click",function(){choose(x)})})(i);p.appendChild(e)}else for(var k=0;k<S.cols[i].length;k++){var n=card(S.cols[i][k],i,k===S.cols[i].length-1,S.sel===i&&k===S.cols[i].length-1);n.style.top=(10+k*45)+"px";p.appendChild(n)}B.appendChild(z)}var z=document.createElement("div"),l=document.createElement("div"),p=document.createElement("div");l.className="label";l.textContent="TRASH";p.className="pile";z.appendChild(l);z.appendChild(p);if(!S.trash.length){var e=document.createElement("div");e.className="empty";e.textContent="TRASH";p.appendChild(e)}else for(var q=0;q<S.trash.length;q++){var n=card(S.trash[q],-1,false,false);n.style.top=(10+Math.min(q,15)*28)+"px";p.appendChild(n)}B.appendChild(z)}
+function lock(v){E("new").disabled=v;E("down").disabled=v||!S.playing||!S.deck.length;E("finish").disabled=v||!S.playing||S.deck.length>0}
+function start(){timers.forEach(clearTimeout);timers=[];if(E("confirmBar")){E("confirmBar").className="confirmBar";E("confirmText").innerHTML=""}E("scorePopup").className="scorePopup";S=fresh();S.deck=mkdeck();S.playing=true;E("result").className="result";E("notice").className="notice";E("score").disabled=true;say("SHUFFLING…","Preparing the deck.");render();lock(true);timers.push(setTimeout(deal,500))}
+function deal(){if(!S.playing||S.ended||!S.deck.length||S.dealing)return;S.dealing=true;S.sel=-1;S.round++;lock(true);var dealt=0;function one(){if(dealt<4&&S.deck.length){var c=S.deck.shift();S.cols[dealt].push(c);S.newIds=[c.id];render();dealt++;timers.push(setTimeout(one,180));return}S.newIds=[];S.dealing=false;if(S.round===1){S.crownDrop=true;S.opening=[];for(var i=0;i<4;i++){if(S.cols[i][0].r!=="A")S.crownDrop=false;S.opening.push(S.cols[i][0].id)}if(S.crownDrop){E("notice").className="notice show";E("noticeText").textContent="Opening four Aces — Ace Cut earned for the end of the game."}}render();E("new").disabled=false;if(S.deck.length){E("down").disabled=false;E("finish").disabled=true;say("ROUND "+S.round+" DEALT.","Make any legal moves, then press Down / Deal Next 4.")}else{E("down").disabled=true;E("finish").disabled=false;say("FINAL ROUND DEALT.","Make final legal moves, then finish normal play.")}}one()}
+function clearConfirm(){S.pending=null;E("confirmBar").className="confirmBar";E("confirmText").innerHTML=""}
+function askConfirm(action,text){S.pending=action;E("confirmText").innerHTML=text;E("confirmBar").className="confirmBar show"}
+function doPending(){var a=S.pending;if(!a)return;clearConfirm();
+ if(a.type==="free"){S.cols[a.to].push(S.cols[a.from].pop());S.sel=-1;render();say("FREE MOVE.","Move confirmed.");return}
+ if(a.type==="elim"){var m=top(a.from);S.trash.push(S.cols[a.from].pop());S.sel=-1;render();say(m.r+m.s+" ELIMINATED.","Elimination confirmed.");return}
+ if(a.type==="ace"){S.cols[a.to].push(S.cols[a.from].pop());S.paid--;S.sel=-1;render();say("PAID ACE MOVE.","Paid Ace Moves remaining: "+S.paid);return}
+ if(a.type==="cut"){performAceCut(a.col);return}
+}
+function choose(i){if(!S.playing||S.dealing)return;if(S.pending)return;if(S.cut){selectAceCut(i);return}if(S.ended)return;var target=top(i);
+ if(S.sel<0){if(!target)return;S.sel=i;render();say(target.r+target.s+" SELECTED.","Choose a legal destination. Nothing changes until you confirm.");return}
+ var from=S.sel,m=top(from);if(from===i){S.sel=-1;clearConfirm();render();say("SELECTION CANCELLED.","Choose another card.");return}
+ if(!target){askConfirm({type:"free",from:from,to:i},"Move <b>"+m.r+m.s+"</b> to empty Column "+(i+1)+"?");return}
+ if(target&&m.s===target.s&&rv(m.r)<rv(target.r)){askConfirm({type:"elim",from:from,to:i},"Eliminate <b>"+m.r+m.s+"</b> using exposed <b>"+target.r+target.s+"</b>?");return}
+ if(m.r==="A"&&S.paid>0){askConfirm({type:"ace",from:from,to:i},"Move <b>"+m.r+m.s+"</b> onto Column "+(i+1)+" and spend <b>1 Paid Ace Move</b>?");return}
+ S.sel=-1;clearConfirm();render();say("ILLEGAL MOVE.","Non-Aces can move only to an open column.");
+}
+function finish(){if(!S.playing||S.deck.length||S.dealing)return;S.ended=true;S.sel=-1;E("finish").disabled=true;if(S.crownDrop){S.cut=true;E("notice").className="notice show";E("noticeText").textContent="ACE CUT ACTIVE — choose a column containing an original opening Ace.";say("CHOOSE YOUR ACE CUT.","This is the final action before scoring.")}else{E("score").disabled=false;say("NORMAL PLAY COMPLETE.","Press Score Game.")}render()}
+function selectAceCut(i){var c=S.cols[i],idx=-1,k;for(k=0;k<c.length;k++)if(S.opening.indexOf(c[k].id)>=0){idx=k;break}if(idx<0){say("NO ORIGINAL ACE THERE.","Choose another column.");return}var count=c.length-idx-1;askConfirm({type:"cut",col:i},"Use <b>Crown Drop</b> on Column "+(i+1)+"? <b>"+count+" card(s)</b> above the opening Ace will go to Trash. This is final.");}
+function performAceCut(i){var c=S.cols[i],idx=-1,k;for(k=0;k<c.length;k++)if(S.opening.indexOf(c[k].id)>=0){idx=k;break}if(idx<0)return;var rem=c.splice(idx+1);for(k=0;k<rem.length;k++)S.trash.push(rem[k]);S.cut=false;E("score").disabled=false;E("noticeText").textContent="Ace Cut complete — "+rem.length+" card(s) moved to Trash.";render();say("ACE CUT COMPLETE.","Press Score Game.")}
+function score(){if(!S.playing||!S.ended||S.cut)return;var remaining=0,exposedAces=0,i,k;for(i=0;i<4;i++){remaining+=S.cols[i].length;if(S.cols[i].length&&S.cols[i][0].r==="A")exposedAces++}var allFourAces=exposedAces===4,perfect=remaining===4&&allFourAces,nearMiss=remaining===5&&allFourAces,soft4=remaining===6&&allFourAces,crown=allFourAces&&!nearMiss&&!perfect,val=remaining,label="HAND",note="";if(perfect){val=4;label="4P · PERFECT 4"}else if(nearMiss){val=5;label="NEAR MISS";note="One card away — Crown bonus lost."}else if(soft4){val=4;label="4S · SOFT 4"}else if(crown){val-=2;label="HAND"}var detail=remaining+" cards remaining · "+S.trash.length+" in Trash"+(crown?" · Crown bonus −2":"");E("result").innerHTML='<div>FINAL SCORE</div><div class="score">'+val+'</div><b>'+label+'</b><div style="color:#aaa;margin-top:5px">'+detail+'</div>'+(note?'<div style="color:#e4c983;margin-top:5px;font-weight:bold">'+note+'</div>':'');E("result").className="result show";E("popupScore").textContent=val;E("popupType").textContent=label;E("popupDetail").innerHTML=detail+(note?'<div class="nearMiss">'+note+'</div>':'');E("scorePopup").className="scorePopup open";S.playing=false;E("score").disabled=true;E("down").disabled=true;say("GAME SCORED.","Press New Game to play again.")}
+S=fresh();E("confirmYes").addEventListener("click",doPending);E("confirmNo").addEventListener("click",function(){clearConfirm();S.sel=-1;render();say("ACTION CANCELLED.","Select a card to continue.")});E("new").addEventListener("click",start);E("popupNew").addEventListener("click",start);E("down").addEventListener("click",deal);E("finish").addEventListener("click",finish);E("score").addEventListener("click",score);E("rules").addEventListener("click",function(){E("modal").className="overlay open"});E("close").addEventListener("click",function(){E("modal").className="overlay"});E("modal").addEventListener("click",function(e){if(e.target===E("modal"))E("modal").className="overlay"});render();
+})();
+</script></body></html>
