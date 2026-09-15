@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090909"><title>Crown Down</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<main class="app">
+<header><div><p class="eyebrow">CARD GAME</p><h1>♛ CROWN DOWN</h1><p class="tag">Four columns. Four Aces. Lowest wins.</p></div><button id="rulesBtn" type="button" class="ghost">Rules</button></header>
+<section class="hud"><div><span>DECK</span><b id="deckN">52</b></div><div><span>TRASH</span><b id="trashN">0</b></div><div><span>ROUND</span><b id="roundN">0 / 13</b></div><div><span>PAID ACE MOVES</span><b id="aceN">2</b></div></section>
+<section class="status"><b id="status">Ready to play.</b><span id="help">Press New Game. There is no time limit.</span></section>
+<section class="table"><div id="board" class="board"></div></section>
+<section class="controls"><button id="newBtn" type="button" class="primary">New Game</button><button id="dealBtn" type="button" disabled>Down / Deal Next 4</button><button id="finishBtn" type="button" disabled>Finish Normal Play</button><button id="scoreBtn" type="button" disabled>Score Game</button></section>
+<section id="crownBox" class="notice hidden"><b>♛ CROWN DROP</b><span id="crownText">After normal play, choose one original Ace for your Ace Cut.</span></section>
+<section id="result" class="result hidden"></section>
+</main>
+<div id="rulesModal" class="modal hidden" aria-hidden="true"><section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rulesTitle"><button id="closeRules" type="button" class="close" aria-label="Close rules">×</button><p class="eyebrow">CROWN DOWN</p><h2 id="rulesTitle">How to Play</h2><div class="rules-copy"><h3>Goal</h3><p>Finish with the lowest score. Only the top card of each of the four columns is active.</p><h3>Eliminations</h3><p>When exposed cards share a suit, a lower-ranked exposed card can be eliminated by a higher-ranked exposed card of that suit. The eliminated card goes to Trash. Recheck the newly exposed card immediately.</p><h3>Movement</h3><p><strong>Normal cards never move between columns.</strong> Only an exposed Ace can move. Ace → empty column is free. Ace → occupied column costs 1 Paid Ace Move. You have 2 Paid Ace Moves per game.</p><h3>Rounds</h3><p>There is no timer. When you are finished making moves, press <strong>Down / Deal Next 4</strong>. Continue until all 52 cards have been dealt.</p><h3>Scoring</h3><p>Each card remaining is +1. Each Ace that is not exposed on top adds another +1. If all four Aces are exposed, you earn Crown and subtract 2. A Soft 4 is a Crown-adjusted score of 4 with more than four physical cards remaining. Perfect 4 means the only four cards remaining are the four Aces; it scores 4 and beats a Soft 4 tie.</p><h3>Crown Drop</h3><p>If the opening four cards are all four Aces, you earn Crown Drop. After normal play, choose one of those original Aces for an Ace Cut: every card above it goes to Trash and that Ace remains.</p></div></section></div>
+<script src="game.js"></script>
+</body></html>
